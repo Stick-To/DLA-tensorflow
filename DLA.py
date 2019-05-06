@@ -65,7 +65,7 @@ class DLA:
                 bottom=conv,
                 filters=self.filters_list[1],
                 kernel_size=3,
-                strides=1,
+                strides=2,
             )
         if self.is_bottleneck:
             stack_basic_fn = self._residual_bottleneck
