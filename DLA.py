@@ -24,7 +24,6 @@ class DLA:
         self.filters_list = config['filters_list']
 
         self.global_step = tf.train.get_or_create_global_step()
-        self.is_training = True
 
         self._define_inputs()
         self._build_graph()
@@ -36,6 +35,7 @@ class DLA:
         self.images = tf.placeholder(dtype=tf.float32, shape=shape, name='images')
         self.labels = tf.placeholder(dtype=tf.int32, shape=[None, self.num_classes], name='labels')
         self.lr = tf.placeholder(dtype=tf.float32, shape=[], name='lr')
+        self.is_training = tf.placeholder(dtype=tf.bool, shape=[], name='is_training')
 
     def _build_graph(self):
 
@@ -125,7 +125,6 @@ class DLA:
         self.best_saver = tf.train.Saver()
 
     def train_one_batch(self, images, labels, lr, sess=None):
-        self.is_training = True
         if sess is None:
             sess_ = self.sess
         else:
@@ -134,12 +133,12 @@ class DLA:
                                  feed_dict={
                                      self.images: images,
                                      self.labels: labels,
-                                     self.lr: lr
+                                     self.lr: lr,
+                                     self.is_training:True
                                  })
         return loss, acc
 
     def validate_one_batch(self, images, labels, sess=None):
-        self.is_training = False
         if sess is None:
             sess_ = self.sess
         else:
@@ -147,19 +146,20 @@ class DLA:
         logit, acc = sess_.run([self.logit, self.accuracy], feed_dict={
                                      self.images: images,
                                      self.labels: labels,
-                                     self.lr: 0.
+                                     self.lr: 0.,
+                                     self.is_training:False
                                  })
         return logit, acc
 
     def test_one_batch(self, images, sess=None):
-        self.is_training = False
         if sess is None:
             sess_ = self.sess
         else:
             sess_ = sess
         logit = sess_.run([self.logit], feed_dict={
                                      self.images: images,
-                                     self.lr: 0.
+                                     self.lr: 0.,
+                                     self.is_training:False
                                  })
         return logit
 
